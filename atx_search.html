@@ -1,0 +1,102 @@
+<html lang="en">
+<head>
+    <title>downtown austin search</title>
+    meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://api.tiles.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.js"></script>
+<link
+href="https://api.tiles.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.css" rel="stylesheet"/>
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.min.js"></script>
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.css" type="text/css"
+/>
+    <style>
+            body {
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+      }
+      </style>
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<script>
+mapboxgl.accessToken = "your key here";
+const map = new mapboxgl.Map ({
+    container: 'map', //the id
+    style: 'mapbox://styles/mapbox/streets-v11', //the basemap style
+    center: [-97.7431, 30.2672], 
+    zoom: 15, 
+});
+const marker = new mapboxgl.Marker() //create a new marker
+.setLngLat([-97.7431,30.2672]) // marker in atx
+.addTo(map); // add marker to map
+
+const geocoder = new MapboxGeocoder({
+    //get the token
+    accessToken: mapboxgl.accessToken,
+    //setup the intance of mapbox gl
+    mapboxgl: mapboxgl, 
+    //marker style won't be the default 
+    marker: false,
+    placeholder: 'Search downtown atx',
+    bbox: 
+    [-97.75068,30.25684,-97.73480,30.28679],
+    proximity:{
+        longitude: -97.74300,
+        latitude:  30.27200
+    }
+});
+//adding the geocoder window to the map
+map.addControl(geocoder);
+
+//prepare a style for a single point added at search result 
+map.on('load', () => {
+  map.addSource('single-point', {
+    type: 'geojson',
+    data: {
+      type: 'FeatureCollection',
+      features: []
+    }
+  });
+//the point layer and style 
+  map.addLayer({
+    id: 'point',
+    source: 'single-point',
+    type: 'circle',
+    paint: {
+      'circle-radius': 10,
+      'circle-color': '#448ee4'
+    }
+  });
+//when the geocoder runs, add the single point at the located selected
+  geocoder.on('result', (event) => {
+    map.getSource('single-point').setData(event.result.geometry);
+  });
+});
+
+</script>
+
+</body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</html>
